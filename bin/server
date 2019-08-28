@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Include common
+source $(dirname ${0})/../lib/libcommon
+
+# Default vars
+PORT=${SERVER_PORT:-8080}
+
+LOG_INFO 'Starting server(0.0.0.0:'${PORT}') via socat ...'
+cd ${WORK}
+cp -rf ${ROOT}/etc/bashttpd.conf ${WORK}/
+ROOT=${ROOT} socat -lf /tmp/lark-bot-request.log TCP4-LISTEN:${PORT},fork EXEC:${HTTP_BIN}

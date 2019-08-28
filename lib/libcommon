@@ -1,0 +1,140 @@
+#!/bin/bash
+
+# Private tmp vars
+__ACCESS_TOKEN=''
+__MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='${APPID}
+
+# Public vars
+ROOT=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))
+WORK='/tmp'
+JSON_BIN=${WORK}'/json_parse'
+HTTP_BIN=${WORK}'/bashttpd'
+
+function LOG_INFO {
+  echo -e "\033[42;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
+}
+
+function LOG_ERROR {
+  force=$1
+  if [ "${DEBUG}" != "" ];
+  then
+    echo -e "\033[41;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
+  fi
+}
+
+function prepare_base_util {
+  mkdir -p ${WORK}
+  [ -f ${ROOT}/.env ] && source ${ROOT}/.env
+  if [ "${APPID}" == "" ] || [ "${APPSECRET}" == "" ];
+  then
+    DEBUG=true LOG_ERROR 'No APPID/APPSECRET config, exit now !'
+    exit -1
+  fi
+  if [ ! -f ${JSON_BIN} ];
+  then
+    curl https://raw.githubusercontent.com/dominictarr/JSON.sh/master/JSON.sh > ${JSON_BIN} 2>/dev/null
+    chmod 755 ${JSON_BIN}
+  fi
+  if [ ! -f ${HTTP_BIN} ];
+  then
+    curl https://raw.githubusercontent.com/ikegam/bashttpd/post/bashttpd > ${HTTP_BIN} 2>/dev/null
+    chmod 755 ${HTTP_BIN}
+  fi
+}
+
+function json_parse {
+  key=$1
+  string=$(cat -)
+  ${JSON_BIN} <<< ${string} | grep "\[${key}\]" | awk '{$1=""; print $0}'
+}
+
+function remove_unused {
+  all_done=false
+  until $all_done;
+  do
+    read string && echo ${string:1:${#string}-2} || all_done=true
+  done
+}
+
+function add_unused {
+  string="$@"
+  string=${string//\\/\\\\}
+  string=${string//\"/\\\"}
+  echo ${string}
+}
+
+function tenant_access_token {
+  if [ "${__ACCESS_TOKEN}" == "" ];
+  then
+    url='/auth/v3/tenant_access_token/internal/'
+    data='{"app_id":"'${APPID}'","app_secret":"'${APPSECRET}'"}'
+    __ACCESS_TOKEN=$(curl \
+      'https://open.feishu.cn/open-apis'${url} \
+      -X POST \
+      -H 'Content-Type: application/json' \
+      --data-binary "${data}" \
+      --compressed 2>/dev/null | json_parse '"tenant_access_token"' | remove_unused)
+  fi
+  echo ${__ACCESS_TOKEN}
+}
+
+function base_http {
+  method=$1
+  url=$2
+  data=$3
+  access_token=$(tenant_access_token)
+  curl \
+    'https://open.feishu.cn/open-apis'${url} \
+    -X ${method} \
+    -H 'Content-Type: application/json' \
+    -H 'Authorization: Bearer '${access_token} \
+    --data-binary "${data}" \
+    --compressed 2>/dev/null
+}
+
+function group_chat_info_list {
+  query=$1
+  base_http 'GET' '/chat/v4/list' '' |\
+    json_parse '"data","groups",[0-9]*,"'${query}'"' |\
+    xargs -n1
+}
+
+function user_id {
+  email=$1
+  base_http 'POST' '/user/v3/email2id' '{"email":"'${email}'"}' |\
+    json_parse '"open_id"' |\
+    remove_unused
+}
+
+function send_message {
+  id_type=$1
+  id=$2
+  msg_type=$3
+  content=$4
+  data='{"'${id_type}'":"'${id}'","msg_type":"'${msg_type}'","content":{'${content}'}}'
+  base_http 'POST' '/message/v3/send/' "${data}"
+}
+
+function send_card_message {
+  id_type=$1
+  id=$2
+  title=$3
+  content=$4
+  button_title=$5
+  button_link=$6
+  data='"card":{"header":{"title":"'${title}'"},"content":[[{"tag":"text","text":"'${content}'"}]],"actions":[{"buttons":[{"text":"'${button_title}'","method":"jump","url":"'${button_link}'"}]}]}'
+  send_message ${id_type} ${id} 'interactive' "${data}" |\
+    json_parse '"code"'
+}
+
+function send_text_message {
+  id_type=$1
+  id=$2
+  content=$3
+  data='"text":"'${content}'"'
+  send_message ${id_type} ${id} 'text' "${data}" |\
+    json_parse '"code"'
+}
+
+# Init process
+prepare_base_util
