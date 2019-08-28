@@ -48,6 +48,10 @@ function json_parse {
   ${JSON_BIN} <<< ${string} | grep "\[${key}\]" | awk '{$1=""; print $0}'
 }
 
+function trim_string {
+  xargs
+}
+
 function remove_unused {
   all_done=false
   until $all_done;
@@ -134,6 +138,15 @@ function send_text_message {
   data='"text":"'${content}'"'
   send_message ${id_type} ${id} 'text' "${data}" |\
     json_parse '"code"'
+}
+
+function reply_text_message {
+  id_type=$1
+  id=$2
+  parent_id=$3
+  content=$4
+  data='{"'${id_type}'":"'${id}'","msg_type":"text","root_id":"'${parent_id}'","content":{"text":"'${content}'"}}'
+  base_http 'POST' '/message/v3/send/' "${data}"
 }
 
 # Init process
