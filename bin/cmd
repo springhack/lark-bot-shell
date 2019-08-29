@@ -3,7 +3,7 @@
 # Include common
 source $(dirname ${0})/../lib/libcommon
 
-
+# Main process
 function main {
   # Send message to users
   emails=()
@@ -11,6 +11,7 @@ function main {
   do
     user=$(user_id ${email})
     send_card_message 'open_id' ${user} '测试标题' '测试内容' '我是按钮' ${__MINI_PROG}
+    send_text_message 'open_id' ${user} '小程序链接'${__MINI_PROG}
   done
   # Send message to groups
   groups=($(group_chat_info_list 'chat_id'))
@@ -21,5 +22,5 @@ function main {
   done
 }
 
-# Main process
+# Run main
 main

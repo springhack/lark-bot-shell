@@ -2,7 +2,7 @@
 
 # Private tmp vars
 __ACCESS_TOKEN=''
-__MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='${APPID}
+__MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='
 
 # Public vars
 ROOT=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))
@@ -40,6 +40,7 @@ function prepare_base_util {
     curl https://raw.githubusercontent.com/springhack/bashttpd/post/bashttpd > ${HTTP_BIN} 2>/dev/null
     chmod 755 ${HTTP_BIN}
   fi
+  __MINI_PROG=${__MINI_PROG}${APPID}
 }
 
 function json_parse {
