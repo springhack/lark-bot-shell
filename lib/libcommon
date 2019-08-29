@@ -68,6 +68,10 @@ function add_unused {
   echo ${string}
 }
 
+function escape_string {
+  echo -en "$(cat -)"
+}
+
 function tenant_access_token {
   if [ "${__ACCESS_TOKEN}" == "" ];
   then
