@@ -12,3 +12,4 @@ SERVER_PORT=8080  # Server Port
 2. Edit `./bin/cmd` for yourself usage
 3. Edit `./etc/bashttpd.conf` for router
 4. Run `./bin/cmd` or `./bin/server` to use
+5. Fill event url to `http://${IP}:${PORT}/on_bot`

@@ -10,27 +10,16 @@ WORK='/tmp'
 JSON_BIN=${WORK}'/json_parse'
 HTTP_BIN=${WORK}'/bashttpd'
 
-# Make 110 as stderr
-exec 110<>/dev/stderr
-
 function LOG_INFO {
-  echo -e "\033[42;37m[$(date)] [DEBUG] ${*}\033[0m" >&110
+  echo -e "\033[42;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
 }
 
 function LOG_ERROR {
   force=$1
   if [ "${DEBUG}" != "" ];
   then
-    echo -e "\033[41;37m[$(date)] [DEBUG] ${*}\033[0m" >&110
+    echo -e "\033[41;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
   fi
-}
-
-function reset_stdout {
-  exec 1<>/dev/null
-}
-
-function reset_stderr {
-  exec 2<>/dev/null
 }
 
 function prepare_base_util {
