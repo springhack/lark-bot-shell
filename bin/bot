@@ -6,15 +6,15 @@ HELP='Maid Yui HELP:\n  help:  this message\n  text {email} {content}:  send tex
 
 function get_chat_resp_json {
   query=$1
-  curl -G http://api.qingyunke.com/api.php \
-    --data-urlencode 'key=free' \
-    --data-urlencode 'appid=0' \
-    --data-urlencode 'msg='"${query}" 2>/dev/null
+  curl -G 'https://api.ownthink.com/bot' \
+    --data-urlencode 'appid=a10347230c3ea20b10de009d8796269b' \
+    --data-urlencode 'userid=lark-bot-maid-yui' \
+    --data-urlencode 'spoken='"${query}" 2>/dev/null
 }
 
 function get_chat_resp {
   query=$1
-  get_chat_resp_json "${query}" | json_parse '"content"' | remove_unused
+  get_chat_resp_json "${query}" | json_parse '"data","info","text"' | remove_unused
 }
 
 function main {
