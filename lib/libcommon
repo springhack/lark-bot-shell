@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Private tmp vars
-__ACCESS_TOKEN=''
+__ACCESS_TOKEN="${ACCESS_TOKEN}"
 __MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='
 
 # Public vars
@@ -20,6 +20,14 @@ function LOG_ERROR {
   then
     echo -e "\033[41;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
   fi
+}
+
+function hold_stdin {
+  yes 2>/dev/null
+}
+
+function hold_stdout {
+  xargs >/dev/null
 }
 
 function prepare_base_util {

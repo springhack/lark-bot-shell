@@ -31,11 +31,6 @@ function main {
       ${POST_VALUES} |\
       remove_unused
     )
-    parent_id=$(
-      json_parse '"event","parent_id"' <<<\
-      ${POST_VALUES} |\
-      remove_unused
-    )
     open_chat_id=$(
       json_parse '"event","open_chat_id"' <<<\
       ${POST_VALUES} |\
@@ -43,6 +38,11 @@ function main {
     )
     user_open_id=$(
       json_parse '"event","user_open_id"' <<<\
+      ${POST_VALUES} |\
+      remove_unused
+    )
+    open_message_id=$(
+      json_parse '"event","open_message_id"' <<<\
       ${POST_VALUES} |\
       remove_unused
     )
@@ -73,12 +73,7 @@ function main {
       ;;
       *)
         resp=$(get_chat_resp "${text_without_at_bot}")
-        if [ "${parent_id}" != "" ];
-        then
-          reply_text_message 'open_chat_id' ${open_chat_id} ${parent_id} "$(add_unused "${at_info}${resp}")"
-        else
-          send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}${resp}")"
-        fi
+        reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused "${at_info}${resp}")"
       ;;
     esac
   fi
