@@ -6,20 +6,21 @@ source $(dirname ${0})/../lib/libcommon
 # Main process
 function main {
   # Send message to users
-  emails=()
+  emails=(chenfuchun)
   for email in "${emails[@]}";
   do
-    user=$(user_id ${email})
+    user=$(user_id $(ensure_email ${email}))
+    user_info ${user}
     send_card_message 'open_id' ${user} '测试标题' '测试内容' '我是按钮' ${__MINI_PROG}
     send_text_message 'open_id' ${user} '小程序链接'${__MINI_PROG}
   done
   # Send message to groups
-  groups=($(group_chat_info_list 'chat_id'))
-  for group in "${groups[@]}";
-  do
-    send_card_message 'open_chat_id' ${group} '测试标题' '测试内容' '我是按钮' ${__MINI_PROG}
-    send_text_message 'open_chat_id' ${group} '小程序链接'${__MINI_PROG}
-  done
+  # groups=($(group_chat_info_list 'chat_id'))
+  # for group in "${groups[@]}";
+  # do
+  #   send_card_message 'open_chat_id' ${group} '测试标题' '测试内容' '我是按钮' ${__MINI_PROG}
+  #   send_text_message 'open_chat_id' ${group} '小程序链接'${__MINI_PROG}
+  # done
 }
 
 # Run main

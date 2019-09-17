@@ -7,6 +7,7 @@ __MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='
 # Public vars
 ROOT=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))
 WORK='/tmp'
+EMAIL_SUFFIX='dosk.win'
 JSON_BIN=${WORK}'/json_parse'
 HTTP_BIN=${WORK}'/bashttpd'
 
@@ -80,6 +81,16 @@ function escape_string {
   echo -en "$(cat -)"
 }
 
+function ensure_email {
+  email=$1
+  if [[ "${email}" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$ ]]
+  then
+    echo "${email}"
+  else
+    echo "${email}@${EMAIL_SUFFIX}"
+  fi
+}
+
 function tenant_access_token {
   if [ "${__ACCESS_TOKEN}" == "" ];
   then
@@ -116,11 +127,20 @@ function group_chat_info_list {
     xargs -n1
 }
 
+function bot_info {
+  base_http 'GET' '/bot/v3/info/' ''
+}
+
 function user_id {
   email=$1
   base_http 'POST' '/user/v3/email2id' '{"email":"'${email}'"}' |\
     json_parse '"open_id"' |\
     remove_unused
+}
+
+function user_info {
+  user_id=$1
+  base_http 'GET' '/user/v3/info?open_id='${user_id} ''
 }
 
 function send_message {

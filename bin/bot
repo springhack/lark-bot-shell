@@ -2,7 +2,7 @@
 
 source ${ROOT}/lib/libcommon
 
-HELP='Maid Yui HELP:\n  help:  this message\n  text {email} {content}:  send text message to email\n  card {email} {title} {content} {button_title} {button_link}:  send card message to email \n  {other_content}:  interactive chat'
+HELP='Maid Yui HELP:\n  help:  this message\n  who:  echo bot info\n  text {email} {content}:  send text message to email\n  card {email} {title} {content} {button_title} {button_link}:  send card message to email \n  info {email}: get user info\n  {other_content}:  interactive chat'
 
 function get_chat_resp_json {
   query=$1
@@ -57,19 +57,39 @@ function main {
       help)
         send_text_message 'open_chat_id' ${open_chat_id} "${HELP}"
       ;;
+      who)
+        json=$(bot_info)
+        name=$(json_parse '"bot","app_name"' <<< "${json}" | remove_unused)
+        avatar=$(json_parse '"bot","avatar_url"' <<< "${json}" | remove_unused)
+        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}我是 ${name} 看我 ${avatar}")"
+      ;;
       text)
-        email=${cmd[1]}
+        email=$(ensure_email ${cmd[1]})
         user=$(user_id ${email})
         resp="$(awk '{$1=""; $2=""; print $0}' <<< "${text_without_at_bot}" | trim_string)"
         result=$(send_text_message 'open_id' ${user} "$(add_unused "${resp}")")
-        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}Result value: ${result}")"
+        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}成功了么: ${result}")"
       ;;
       card)
-        email=${cmd[1]}
+        email=$(ensure_email ${cmd[1]})
         user=$(user_id ${email})
         resp="$(awk '{$1=""; $2=""; print $0}' <<< "${text_without_at_bot}" | trim_string)"
         result=$(send_card_message 'open_id' ${user} "${cmd[2]}" "${cmd[3]}" "${cmd[4]}" "${cmd[5]}")
-        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}Result value: ${result}")"
+        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}成功了么: ${result}")"
+      ;;
+      info)
+        email=$(ensure_email ${cmd[1]})
+        user=$(user_id ${email})
+        info=$(user_info "${user}")
+        code=$(json_parse '"code"' <<< "${info}" | trim_string)
+        if [ "${code}x" == "0x" ];
+        then
+          user_name=$(json_parse '"name"' <<< "${info}" | remove_unused)
+          user_avatar=$(json_parse '"avatar"' <<< "${info}" | remove_unused)
+          send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}name: ${user_name} avatar: ${user_avatar}")"
+        else
+          send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused "${at_info}查无此人吖!")"
+        fi
       ;;
       *)
         resp=$(get_chat_resp "${text_without_at_bot}")
