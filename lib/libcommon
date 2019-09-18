@@ -57,7 +57,7 @@ function bot_info {
 
 function user_id {
   email=$1
-  base_http 'POST' '/user/v3/email2id' '{"email":"'${email}'"}' |\
+  base_http 'POST' '/user/v3/email2id' $(json_build email ${email}) |\
     json_parse '"open_id"' |\
     remove_unused
 }
@@ -72,7 +72,7 @@ function send_message {
   id=$2
   msg_type=$3
   content=$4
-  data='{"'${id_type}'":"'${id}'","msg_type":"'${msg_type}'","content":{'${content}'}}'
+  data=$(json_build ${id_type} ${id} msg_type ${msg_type} content ~"${content}")
   base_http 'POST' '/message/v3/send/' "${data}"
 }
 
@@ -83,7 +83,14 @@ function send_card_message {
   content=$4
   button_title=$5
   button_link=$6
-  data='"card":{"header":{"title":"'${title}'"},"content":[[{"tag":"text","text":"'${content}'"}]],"actions":[{"buttons":[{"text":"'${button_title}'","method":"jump","url":"'${button_link}'"}]}]}'
+  data=$(
+    json_build card ~$(
+      json_build \
+        header ~$(json_build title "${title}") \
+        content ~[[$(json_build tag text text "${content}")]] \
+        actions ~[$(json_build buttons ~[$(json_build text "${button_title}" method jump url "${button_link}")])]
+    )
+  )
   send_message ${id_type} ${id} 'interactive' "${data}" |\
     json_parse '"code"'
 }
@@ -92,7 +99,7 @@ function send_text_message {
   id_type=$1
   id=$2
   content=$3
-  data='"text":"'${content}'"'
+  data=$(json_build text "${content}")
   send_message ${id_type} ${id} 'text' "${data}" |\
     json_parse '"code"'
 }
@@ -102,7 +109,7 @@ function reply_text_message {
   id=$2
   parent_id=$3
   content=$4
-  data='{"'${id_type}'":"'${id}'","msg_type":"text","root_id":"'${parent_id}'","content":{"text":"'${content}'"}}'
+  data=$(json_build ${id_type} ${id} msg_type text root_id ${parent_id} content ~$(json_build text "${content}"))
   base_http 'POST' '/message/v3/send/' "${data}"
 }
 

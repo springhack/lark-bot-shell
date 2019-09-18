@@ -34,6 +34,8 @@ function remove_unused {
 }
 
 function add_unused {
+  old_ifs=$IFS
+  IFS=''
   all_done=false
   first_line=true
   string=''
@@ -51,6 +53,7 @@ function add_unused {
       fi
     } || all_done=true
   done
+  IFS=$old_ifs
   echo "${string}"
 }
 

@@ -3,13 +3,13 @@
 source ${ROOT}/lib/libcommon
 
 HELP=$(cat << EOF
-'Maid Yui HELP:
+Maid Yui HELP:
   help:  this message
   who:  echo bot info
   text {email} {content}:  send text message to email
   card {email} {title} {content} {button_title} {button_link}:  send card message to email 
   info {email}: get user info
-  {other_content}:  interactive chat'
+  {other_content}:  interactive chat
 EOF
 )
 
