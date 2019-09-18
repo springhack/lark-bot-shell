@@ -1,0 +1,138 @@
+#!/bin/bash
+
+# Public vars
+JSON_BIN=${WORK}'/json_parse'
+HTTP_BIN=${WORK}'/bashttpd'
+
+
+function LOG_INFO {
+  echo -e "\033[42;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
+}
+
+function LOG_ERROR {
+  force=$1
+  if [ "${DEBUG}" != "" ];
+  then
+    echo -e "\033[41;37m[$(date)] [DEBUG] ${*}\033[0m" > /dev/stderr
+  fi
+}
+
+function hold_stdin {
+  yes 2>/dev/null
+}
+
+function hold_stdout {
+  xargs >/dev/null
+}
+
+function remove_unused {
+  all_done=false
+  until $all_done;
+  do
+    read string && echo ${string:1:${#string}-2} || all_done=true
+  done
+}
+
+function add_unused {
+  all_done=false
+  first_line=true
+  string=''
+  until $all_done;
+  do
+    read line && {
+      line=${line//\\/\\\\}
+      line=${line//\"/\\\"}
+      if $first_line;
+      then
+        string="${line}"
+        first_line=false
+      else
+        string="${string}\n${line}"
+      fi
+    } || all_done=true
+  done
+  echo "${string}"
+}
+
+function escape_string {
+  echo -en "$(cat -)"
+}
+
+function ensure_email {
+  email=$1
+  if [[ "${email}" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$ ]]
+  then
+    echo "${email}"
+  else
+    echo "${email}@${EMAIL_SUFFIX}"
+  fi
+}
+
+function prepare_base_util {
+  mkdir -p ${WORK}
+  [ -f ${ROOT}/.env ] && source ${ROOT}/.env
+  if [ "${APPID}" == "" ] || [ "${APPSECRET}" == "" ];
+  then
+    DEBUG=true LOG_ERROR 'No APPID/APPSECRET config, exit now !'
+    exit -1
+  fi
+  if [ ! -f ${JSON_BIN} ];
+  then
+    curl https://raw.githubusercontent.com/dominictarr/JSON.sh/master/JSON.sh > ${JSON_BIN} 2>/dev/null
+    chmod 755 ${JSON_BIN}
+  fi
+  if [ ! -f ${HTTP_BIN} ];
+  then
+    curl https://raw.githubusercontent.com/springhack/bashttpd/post/bashttpd > ${HTTP_BIN} 2>/dev/null
+    chmod 755 ${HTTP_BIN}
+  fi
+  __MINI_PROG=${__MINI_PROG}${APPID}
+}
+
+function json_parse {
+  key=$1
+  string=$(cat -)
+  ${JSON_BIN} <<< ${string} | grep "\[${key}\]" | awk '{$1=""; print $0}'
+}
+
+function json_build {
+  local arr=( "$@" )
+  local len=${#arr[@]}
+
+  if [[ ${len} -eq 0 ]];
+  then
+    >&2 echo "Error: Length of input array needs to be at least 2."
+    return 1
+  fi
+
+  if [[ $((len%2)) -eq 1 ]];
+  then
+    >&2 echo "Error: Length of input array needs to be even (key/value pairs)."
+    return 1
+  fi
+
+  local data=""
+  local foo=0
+  for i in "${arr[@]}";
+  do
+    local char=","
+    if [ $((++foo%2)) -eq 0 ];
+    then
+      char=":"
+    fi
+    local first="${i:0:1}"
+    local app="\"$i\""
+    if [[ "$first" == "~" ]];
+    then
+      app="${i:1}"
+    fi
+    data="$data$char$app"
+  done
+
+  data="${data:1}"
+  echo "{$data}"
+}
+
+function trim_string {
+  xargs
+}
