@@ -34,14 +34,12 @@ function remove_unused {
 }
 
 function add_unused {
-  old_ifs=$IFS
-  IFS=''
   all_done=false
   first_line=true
   string=''
   until $all_done;
   do
-    read line && {
+    IFS='' read line && {
       line=${line//\\/\\\\}
       line=${line//\"/\\\"}
       if $first_line;
@@ -53,7 +51,6 @@ function add_unused {
       fi
     } || all_done=true
   done
-  IFS=$old_ifs
   echo "${string}"
 }
 
