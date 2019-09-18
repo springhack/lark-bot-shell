@@ -102,7 +102,7 @@ function main {
       ;;
       *)
         resp=$(get_chat_resp "${text_without_at_bot}")
-        reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused "${at_info}${resp}")"
+        reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused <<< "${at_info}${resp}")"
       ;;
     esac
   fi
