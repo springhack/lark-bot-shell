@@ -8,26 +8,37 @@ __MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='
 ROOT=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))
 WORK='/tmp'
 EMAIL_SUFFIX='dosk.win'
-
 function INCLUDE {
   source ${ROOT}/$1
 }
 
+# Include base utils
 INCLUDE lib/libutils
 
 function tenant_access_token {
-  if [ "${__ACCESS_TOKEN}" == "" ];
+  force=$1
+  expire=0
+  if [ "${__ACCESS_TOKEN}" == "" ] || [ "${force}" != "" ];
   then
-    url='/auth/v3/tenant_access_token/internal/'
-    data='{"app_id":"'${APPID}'","app_secret":"'${APPSECRET}'"}'
-    __ACCESS_TOKEN=$(curl \
-      'https://open.feishu.cn/open-apis'${url} \
-      -X POST \
-      -H 'Content-Type: application/json' \
-      --data-binary "${data}" \
-      --compressed 2>/dev/null | json_parse '"tenant_access_token"' | remove_unused)
+    if [ "${ACCESS_TOKEN_STORE}" != "" ] && [ -e "${ACCESS_TOKEN_STORE}" ];
+    then
+      source ${ACCESS_TOKEN_STORE}
+      __ACCESS_TOKEN="${ACCESS_TOKEN}"
+    else
+      url='/auth/v3/tenant_access_token/internal/'
+      data='{"app_id":"'${APPID}'","app_secret":"'${APPSECRET}'"}'
+      json=$(curl \
+        'https://open.feishu.cn/open-apis'${url} \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        --data-binary "${data}" \
+        --compressed 2>/dev/null)
+      __ACCESS_TOKEN=$(json_parse '"tenant_access_token"' <<< "${json}" | remove_unused)
+      expire=$(json_parse '"expire"' <<< "${json}")
+    fi
   fi
   echo ${__ACCESS_TOKEN}
+  return ${expire}
 }
 
 function base_http {

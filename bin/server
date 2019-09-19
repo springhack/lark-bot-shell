@@ -3,10 +3,30 @@
 # Include common
 source $(dirname ${0})/../lib/libcommon
 
-# Default vars
-PORT=${SERVER_PORT:-8080}
-
-LOG_INFO 'Starting server(0.0.0.0:'${PORT}') via socat ...'
+# Env init
 cd ${WORK}
+export ACCESS_TOKEN=''
+PORT=${SERVER_PORT:-8080}
+access_token_store=$(mktemp)
+
+# Start Server
+trap 'kill $(jobs -p) 2>/dev/null' EXIT
 cp -rf ${ROOT}/etc/bashttpd.conf ${WORK}/
-ROOT=${ROOT} socat -d -d -lf /tmp/lark-bot-request.log TCP4-LISTEN:${PORT},fork EXEC:${HTTP_BIN}
+LOG_INFO 'Starting server(0.0.0.0:'${PORT}') via socat ...'
+ACCESS_TOKEN_STORE=${access_token_store} ROOT=${ROOT} socat -d -d -lf /tmp/lark-bot-request.log TCP4-LISTEN:${PORT},fork EXEC:${HTTP_BIN} &
+
+# Access token daemon
+while true;
+do
+  token=$(tenant_access_token force)
+  expire=$?
+  echo "ACCESS_TOKEN='${token}'" > ${access_token_store}
+  LOG_INFO "Obtin access token: ${token}\n => to store: ${access_token_store}\n => timeout: ${expire}"
+  timeout=$((${expire} - 10))
+  if [ ${timeout} -le 0 ];
+  then
+    timeout=${expire}
+  fi
+  LOG_INFO "Wait for ${timeout} ..."
+  sleep ${timeout}
+done
