@@ -120,7 +120,7 @@ function reply_text_message {
   id=$2
   parent_id=$3
   content=$4
-  data=$(json_build ${id_type} ${id} msg_type text root_id ${parent_id} content ~$(json_build text "${content}"))
+  data=$(json_build ${id_type} ${id} msg_type text root_id ${parent_id} content ~"$(json_build text "${content}")")
   base_http 'POST' '/message/v3/send/' "${data}"
 }
 
