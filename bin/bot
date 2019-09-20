@@ -40,6 +40,11 @@ function main {
       ${POST_VALUES} |\
       remove_unused
     )
+    parent_id=$(
+      json_parse '"event","parent_id"' <<<\
+      ${POST_VALUES} |\
+      remove_unused
+    )
     open_chat_id=$(
       json_parse '"event","open_chat_id"' <<<\
       ${POST_VALUES} |\
@@ -60,7 +65,7 @@ function main {
       ${POST_VALUES} |\
       remove_unused
     )
-    cmd=($(trim_string <<< ${text_without_at_bot}))
+    cmd=($(remove_html_tags <<< "${text_without_at_bot}" | trim_string))
     at_info=$([ "${chat_type}" == "private" ] && echo '' || echo '<at user_id="'${user_open_id}'">test</at> ')
     case ${cmd[0]} in
       help)
@@ -102,7 +107,11 @@ function main {
       ;;
       *)
         resp=$(get_chat_resp "${text_without_at_bot}")
-        reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused <<< "${at_info}${resp}")"
+        code=$(reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused <<< "${at_info}${resp}")" | trim_string)
+        if [ "${code}" != "0" ];
+        then
+          reply_text_message 'open_chat_id' ${open_chat_id} ${parent_id} "$(add_unused <<< "${resp}")"
+        fi
       ;;
     esac
   fi

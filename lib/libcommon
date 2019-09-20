@@ -121,7 +121,8 @@ function reply_text_message {
   parent_id=$3
   content=$4
   data=$(json_build ${id_type} ${id} msg_type text root_id ${parent_id} content ~"$(json_build text "${content}")")
-  base_http 'POST' '/message/v3/send/' "${data}"
+  base_http 'POST' '/message/v3/send/' "${data}" |\
+    json_parse '"code"'
 }
 
 # Init process
