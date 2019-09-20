@@ -69,7 +69,7 @@ function main {
     at_info=$([ "${chat_type}" == "private" ] && echo '' || echo '<at user_id="'${user_open_id}'">test</at> ')
     case ${cmd[0]} in
       help)
-        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused <<< ${HELP})"
+        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused <<< "${HELP}")"
       ;;
       who)
         json=$(bot_info)
