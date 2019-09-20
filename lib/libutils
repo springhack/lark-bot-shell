@@ -4,7 +4,7 @@
 JSON_BIN=${WORK}'/json_parse'
 HTTP_BIN=${WORK}'/bashttpd'
 DEOCDE_BIN=${WORK}'/decode_unicode.php'
-OS=$([ "$(uname -a | grep 'Darwin')" != "" ] && echo 'darwin' || 'linux')
+OS=$([ "$(uname -a | grep 'Darwin')" != "" ] && echo 'darwin' || echo 'linux')
 
 
 function LOG_INFO {
