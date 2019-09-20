@@ -106,7 +106,7 @@ function main {
         fi
       ;;
       *)
-        resp=$(get_chat_resp "${text_without_at_bot}")
+        resp=$(get_chat_resp "$(remove_html_tags <<< "${text_without_at_bot}")")
         code=$(reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused <<< "${at_info}${resp}")" | trim_string)
         if [ "${code}" != "0" ];
         then
