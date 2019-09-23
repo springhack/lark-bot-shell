@@ -9,6 +9,7 @@ Maid Yui HELP:
   text {email} {content}:  send text message to email
   card {email} {title} {content} {button_title} {button_link}:  send card message to email 
   info {email}: get user info
+  image {email} {url}:  send image message to email
   {other_content}:  interactive chat
 EOF
 )
@@ -82,6 +83,13 @@ function main {
         user=$(user_id ${email})
         resp="$(awk '{$1=""; $2=""; print $0}' <<< "${text_without_at_bot}" | trim_string)"
         result=$(send_text_message 'open_id' ${user} "$(add_unused <<< "${resp}")")
+        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused <<< "${at_info}成功了么: ${result}")"
+      ;;
+      image)
+        email=$(ensure_email ${cmd[1]})
+        user=$(user_id ${email})
+        resp="$(awk '{$1=""; $2=""; print $0}' <<< "${text_without_at_bot}" | trim_string)"
+        result=$(send_image_message 'open_id' ${user} "${resp}")
         send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused <<< "${at_info}成功了么: ${result}")"
       ;;
       card)

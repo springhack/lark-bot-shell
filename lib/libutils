@@ -148,3 +148,10 @@ function json_build {
 function trim_string {
   xargs
 }
+
+function make_cached_file {
+  url=$1
+  file=$(mktemp)
+  curl "${url}" > "${file}" 2>/dev/null
+  echo "${file}"
+}

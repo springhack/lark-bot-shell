@@ -78,6 +78,20 @@ function user_info {
   base_http 'GET' '/user/v3/info?open_id='${user_id} ''
 }
 
+function upload_image {
+  file=$1
+  access_token=$(tenant_access_token)
+  curl \
+    'https://open.feishu.cn/open-apis/image/v4/upload/' \
+    -X 'POST' \
+    -H 'Content-Type: multipart/form-data' \
+    -H 'Authorization: Bearer '${access_token} \
+    -F "image=@${file}" \
+    --compressed 2>/dev/null |\
+    json_parse '"data","image_key"' |\
+    remove_unused
+}
+
 function send_message {
   id_type=$1
   id=$2
@@ -121,6 +135,29 @@ function reply_text_message {
   parent_id=$3
   content=$4
   data=$(json_build ${id_type} ${id} msg_type text root_id ${parent_id} content ~"$(json_build text "${content}")")
+  base_http 'POST' '/message/v3/send/' "${data}" |\
+    json_parse '"code"'
+}
+
+function send_image_message {
+  id_type=$1
+  id=$2
+  img_url=$3
+  tmp_img_file=$(make_cached_file "${img_url}")
+  image_key=$(upload_image "${tmp_img_file}")
+  data=$(json_build image_key "${image_key}")
+  send_message ${id_type} ${id} 'image' "${data}" |\
+    json_parse '"code"'
+}
+
+function reply_image_message {
+  id_type=$1
+  id=$2
+  parent_id=$3
+  img_url=$4
+  tmp_img_file=$(make_cached_file "${img_url}")
+  image_key=$(upload_image "${tmp_img_file}")
+  data=$(json_build ${id_type} ${id} msg_type image root_id ${parent_id} content ~"$(json_build image_key "${image_key}")")
   base_http 'POST' '/message/v3/send/' "${data}" |\
     json_parse '"code"'
 }
