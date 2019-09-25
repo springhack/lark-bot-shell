@@ -108,13 +108,16 @@ function send_card_message {
   content=$4
   button_title=$5
   button_link=$6
+  header="$(json_build title "${title}")"
+  content="[[$(json_build tag text text "${content}")]]"
+  actions="[$(json_build buttons ~[$(json_build text "${button_title}" method jump url "${button_link}")])]"
   data=$(
-    json_build card ~$(
+    json_build card ~"$(
       json_build \
-        header ~$(json_build title "${title}") \
-        content ~[[$(json_build tag text text "${content}")]] \
-        actions ~[$(json_build buttons ~[$(json_build text "${button_title}" method jump url "${button_link}")])]
-    )
+        header ~"${header}" \
+        content ~"${content}" \
+        actions ~"${actions}"
+    )"
   )
   send_message ${id_type} ${id} 'interactive' "${data}" |\
     json_parse '"code"'
