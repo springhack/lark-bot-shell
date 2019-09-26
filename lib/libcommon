@@ -73,6 +73,13 @@ function user_id {
     remove_unused
 }
 
+function exchange_id {
+  api=$1
+  id_type=$2
+  id=$3
+  base_http 'POST' "/exchange/v3/${api}/" "$(json_build "${id_type}" "${id}")"
+}
+
 function user_info {
   user_id=$1
   base_http 'GET' '/user/v3/info?open_id='${user_id} ''
