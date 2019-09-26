@@ -94,7 +94,7 @@ function prepare_base_util {
   fi
   if [ ! -f ${HTTP_BIN} ];
   then
-    curl https://raw.githubusercontent.com/springhack/bashttpd/post/bashttpd > ${HTTP_BIN} 2>/dev/null
+    curl https://raw.githubusercontent.com/springhack/bashttpd/master/bashttpd > ${HTTP_BIN} 2>/dev/null
     chmod 755 ${HTTP_BIN}
   fi
   echo '<?php $code = file_get_contents("php://stdin");echo json_encode(json_decode($code));' > ${DEOCDE_BIN}
