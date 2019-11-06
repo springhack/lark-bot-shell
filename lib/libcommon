@@ -152,9 +152,12 @@ function reply_text_message {
 function send_image_message {
   id_type=$1
   id=$2
-  img_url=$3
-  tmp_img_file=$(make_cached_file "${img_url}")
-  image_key=$(upload_image "${tmp_img_file}")
+  image_key=$3
+  if [ "$(is_uuid ${image_key})" != "true" ];
+  then
+    tmp_img_file=$(make_cached_file "${image_key}")
+    image_key=$(upload_image "${tmp_img_file}")
+  fi
   data=$(json_build image_key "${image_key}")
   send_message ${id_type} ${id} 'image' "${data}" |\
     json_parse '"code"'

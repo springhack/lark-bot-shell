@@ -10,7 +10,7 @@ Maid Yui HELP:
   text {email} {content}:  send text message to email
   card {email} {title} {content} {button_title} {button_link}:  send card message to email 
   info {email}:  get user info
-  image {email} {url}:  send image message to email
+  image {email} {url/image_key}:  send image message to email
   {other_content}:  interactive chat
 EOF
 )
@@ -37,6 +37,11 @@ function main {
   )
   if [ "${event_type}" == "message" ];
   then
+    msg_type=$(
+      json_parse '"event","msg_type"' <<<\
+      ${POST_VALUES} |\
+      remove_unused
+    )
     chat_type=$(
       json_parse '"event","chat_type"' <<<\
       ${POST_VALUES} |\
@@ -112,7 +117,7 @@ function main {
         user=$(user_id ${email})
         info=$(user_info "${user}")
         code=$(json_parse '"code"' <<< "${info}" | trim_string)
-        if [ "${code}x" == "0x" ];
+        if [ "${code}" == "0" ];
         then
           user_name=$(json_parse '"name"' <<< "${info}" | remove_unused)
           user_avatar=$(json_parse '"avatar"' <<< "${info}" | remove_unused)
@@ -122,7 +127,30 @@ function main {
         fi
       ;;
       *)
-        resp=$(get_chat_resp "$(remove_html_tags <<< "${text_without_at_bot}")")
+        case "${msg_type}" in
+          text)
+            resp=$(get_chat_resp "$(remove_html_tags <<< "${text_without_at_bot}")")
+          ;;
+          file)
+            file_key=$(
+              json_parse '"event","file_key"' <<<\
+              ${POST_VALUES} |\
+              remove_unused
+            )
+            resp="这个文件 ${file_key} 我还处理不了吖!"
+          ;;
+          image)
+            image_key=$(
+              json_parse '"event","image_key"' <<<\
+              ${POST_VALUES} |\
+              remove_unused
+            )
+            resp="这个图片 ${image_key} 我记下了!"
+          ;;
+          *)
+            resp='虽然不知道你在说甚，但是俺记下了!'
+          ;;
+        esac
         code=$(reply_text_message 'open_chat_id' ${open_chat_id} ${open_message_id} "$(add_unused <<< "${at_info}${resp}")" | trim_string)
         if [ "${code}" != "0" ];
         then

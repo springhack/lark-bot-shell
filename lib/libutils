@@ -39,6 +39,17 @@ function remove_unused {
   done
 }
 
+function is_uuid {
+  may_uuid=$1
+  lens=$(echo ${may_uuid} | awk -F '-' '{print length($1), length($2), length($3), length($4), length($5)}' 2>/dev/null)
+  if [ "${lens}" == "8 4 4 4 12" ];
+  then
+    echo 'true'
+    return
+  fi
+  echo 'false'
+}
+
 function add_unused {
   all_done=false
   first_line=true
