@@ -6,9 +6,10 @@ HELP=$(cat << EOF
 Maid Yui HELP:
   help:  this message
   who:  echo bot info
+  app {email}:  send mini-app to email
   text {email} {content}:  send text message to email
   card {email} {title} {content} {button_title} {button_link}:  send card message to email 
-  info {email}: get user info
+  info {email}:  get user info
   image {email} {url}:  send image message to email
   {other_content}:  interactive chat
 EOF
