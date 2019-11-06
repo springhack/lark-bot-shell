@@ -78,6 +78,13 @@ function main {
         avatar=$(json_parse '"bot","avatar_url"' <<< "${json}" | remove_unused)
         send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused <<< "${at_info}我是 ${name} 看我 ${avatar}")"
       ;;
+      app)
+        email=$(ensure_email ${cmd[1]})
+        user=$(user_id ${email})
+        resp="$(awk '{$1=""; $2=""; print $0}' <<< "${text_without_at_bot}" | trim_string)"
+        result=$(send_card_message 'open_id' ${user} "小程序" "点击按钮访问小程序" "访问" "${__MINI_PROG}")
+        send_text_message 'open_chat_id' ${open_chat_id} "$(add_unused <<< "${at_info}成功了么: ${result}")"
+      ;;
       text)
         email=$(ensure_email ${cmd[1]})
         user=$(user_id ${email})

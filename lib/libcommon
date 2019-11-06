@@ -2,7 +2,7 @@
 
 # Private tmp vars
 __ACCESS_TOKEN="${ACCESS_TOKEN}"
-__MINI_PROG='lark://mini-program/open?mode=sidebar-semi&appId='
+__MINI_PROG='https://applink.feishu.cn/client/mini_program/open?mode=sidebar-semi&appId='
 
 # Public vars
 ROOT=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))
