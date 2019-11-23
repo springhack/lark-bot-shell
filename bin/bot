@@ -4,6 +4,7 @@ source ${ROOT}/lib/libcommon
 
 HELP=$(cat << EOF
 Maid Yui HELP:
+  Design by SpringHack using Bash Shell (Github: https://github.com/springhack/lark-bot-shell)
   help:  this message
   who:  echo bot info
   app {email}:  send mini-app to email
