@@ -3,16 +3,30 @@
 source ${ROOT}/lib/libcommon
 
 HELP=$(cat << EOF
-Maid Yui HELP:
-  Design by SpringHack using Bash Shell (Github: https://github.com/springhack/lark-bot-shell)
-  help:  this message
-  who:  echo bot info
-  app {email}:  send mini-app to email
-  text {email} {content}:  send text message to email
-  card {email} {title} {content} {button_title} {button_link}:  send card message to email 
-  info {email}:  get user info
-  image {email} {url/image_key}:  send image message to email
-  {other_content}:  interactive chat
+· Maid Yui HELP
+  |-- Common commands
+  |   |-- help
+  |   |   \`-- this message
+  |   |-- who
+  |   |   \`-- echo bot info
+  |   \`-- info {email}
+  |       \`-- get user info
+  |-- Admin commands
+  |   |-- text {email} {content}
+  |   |   \`-- send text message to email
+  |   |-- image {email} {url/image_key}
+  |   |   \`-- send image message to email
+  |   \`-- card {email} {title} {content} {button_title} {button_link}:
+  |       \`-- send card message to email
+  |-- Mini Apps
+  |   \`-- app/app {email}
+  |       \`-- send mini-app to email
+  \`-- Chat with me
+       \`-- {any other string}
+           \`-- interactive chat
+
+Design by [SpringHack](https://www.dosk.win/)
+Powered by BASH SHELL [Github](https://github.com/springhack/lark-bot-shell)
 EOF
 )
 
