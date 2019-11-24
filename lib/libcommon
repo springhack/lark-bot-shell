@@ -153,10 +153,14 @@ function send_image_message {
   id_type=$1
   id=$2
   image_key=$3
-  if [ "$(is_uuid ${image_key})" != "true" ];
+  if [ "$(is_tt_uuid ${image_key})" != "true" ];
   then
-    tmp_img_file=$(make_cached_file "${image_key}")
-    image_key=$(upload_image "${tmp_img_file}")
+    image_key_parts=($(echo $image_key | awk -F '_' '{print $1, $2}'))
+    if [ "${image_key_parts[0]}" != "img" ] || [ "$(is_tt_uuid ${image_key_parts[1]})" != "true" ];
+    then
+      tmp_img_file=$(make_cached_file "${image_key}")
+      image_key=$(upload_image "${tmp_img_file}")
+    fi
   fi
   data=$(json_build image_key "${image_key}")
   send_message ${id_type} ${id} 'image' "${data}" |\

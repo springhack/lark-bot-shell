@@ -41,13 +41,13 @@ function remove_unused {
 
 function is_uuid {
   may_uuid=$1
-  lens=$(echo ${may_uuid} | awk -F '-' '{print length($1), length($2), length($3), length($4), length($5)}' 2>/dev/null)
-  if [ "${lens}" == "8 4 4 4 12" ];
-  then
-    echo 'true'
-    return
-  fi
-  echo 'false'
+  [[ $may_uuid =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]] && echo 'true' || echo 'false'
+}
+
+# WTF why we have character more than f ???
+function is_tt_uuid {
+  may_uuid=$1
+  [[ $may_uuid =~ ^\{?[A-Z0-9a-z]{8}-[A-Z0-9a-z]{4}-[A-Z0-9a-z]{4}-[A-Z0-9a-z]{4}-[A-Z0-9a-z]{12}\}?$ ]] && echo 'true' || echo 'zalse'
 }
 
 function add_unused {
