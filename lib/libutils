@@ -35,7 +35,7 @@ function remove_unused {
   all_done=false
   until $all_done;
   do
-    read string && echo ${string:1:${#string}-2} || all_done=true
+    read string && echo "${string:1:${#string}-2}" || all_done=true
   done
 }
 

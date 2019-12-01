@@ -37,7 +37,7 @@ function tenant_access_token {
       expire=$(json_parse '"expire"' <<< "${json}")
     fi
   fi
-  echo ${__ACCESS_TOKEN}
+  echo "${__ACCESS_TOKEN}"
   return ${expire}
 }
 
@@ -155,7 +155,7 @@ function send_image_message {
   image_key=$3
   if [ "$(is_tt_uuid ${image_key})" != "true" ];
   then
-    image_key_parts=($(echo $image_key | awk -F '_' '{print $1, $2}'))
+    image_key_parts=($(echo "${image_key}" | awk -F '_' '{print $1, $2}'))
     if [ "${image_key_parts[0]}" != "img" ] || [ "$(is_tt_uuid ${image_key_parts[1]})" != "true" ];
     then
       tmp_img_file=$(make_cached_file "${image_key}")
